@@ -1,0 +1,10 @@
+x = l1*cos(q1) + l2*cos(q1 + q2)
+y = l1*sin(q1) + l2*sin(q1 + q2)
+m11 = I1 + l1**2*m + l1**2*m1/4 + l1**2*m2 + 2*l1*l2*m*cos(q2) + l1*l2*m2*cos(q2) + l2**2*m + l2**2*m2/4
+m12 = l1*l2*m*cos(q2) + l1*l2*m2*cos(q2)/2 + l2**2*m + l2**2*m2/4
+m21 = l1*l2*m*cos(q2) + l1*l2*m2*cos(q2)/2 + l2**2*m + l2**2*m2/4
+m22 = I2 + l2**2*m + l2**2*m2/4
+g1 = g*(l1*m*cos(q1) + l1*m1*cos(q1)/2 + l1*m2*cos(q1) + l2*m*cos(q1 + q2) + l2*m2*cos(q1 + q2)/2)
+g2 = g*(l2*m*cos(q1 + q2) + l2*m2*cos(q1 + q2)/2)
+h1 = (-2*l1*l2*m*sin(q2) - l1*l2*m2*sin(q2))*dq1*dq2 + (-l1*l2*m*sin(q2) - l1*l2*m2*sin(q2)/2)*dq2**2
+h2 = (l1*l2*m*sin(q2) + l1*l2*m2*sin(q2)/2)*dq1**2
