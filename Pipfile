@@ -12,6 +12,7 @@ sympy = "*"
 ipython = "*"
 matplotlib = "*"
 pyqt5 = "*"
+pexpect = "*"
 
 [requires]
 python_version = "3.7"
