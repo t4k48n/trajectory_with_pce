@@ -70,10 +70,19 @@ def dt_seq(t):
         return seq_index * numpy.nan_to_num(t ** (seq_index - 1.0))
     raise ValueError("dimention of t must be 0 or one")
 
+def _ddt_seq_slower(t):
+    t = numpy.asarray(t, dtype=numpy.float64)
+    return numpy.array([_ddt_seq_slower.ddtf(i, t) for i in range(11)], dtype=numpy.float64)
+_ddt_seq_slower.ddtf = numpy.vectorize(lambda i, t: i*(i-1.0)*t**(i-2.0) if i - 2 >= 0 else 0.0)
+
 def ddt_seq(t):
     t = numpy.asarray(t, dtype=numpy.float64)
-    return numpy.array([ddt_seq.ddtf(i, t) for i in range(11)], dtype=numpy.float64)
-ddt_seq.ddtf = numpy.vectorize(lambda i, t: i*(i-1.0)*t**(i-2.0) if i - 2 >= 0 else 0.0)
+    if t.ndim == 0:
+        return SEQ_INDEX * (SEQ_INDEX - 1.0) * numpy.nan_to_num(t ** (SEQ_INDEX - 2.0))
+    elif t.ndim == 1:
+        seq_index = numpy.expand_dims(SEQ_INDEX, 1)
+        return seq_index * (seq_index - 1.0) * numpy.nan_to_num(t ** (seq_index - 2.0))
+    raise ValueError("dimention of t must be 0 or one")
 
 # 時刻
 T_INIT = 0.0
@@ -115,14 +124,14 @@ def generate_q2funcs(a_6_10):
     return q2func, dq2func, ddq2func
 
 def calculate_taus(a1_6_10, a2_6_10):
-    f1, f2, f3 = generate_q1funcs(a1_6_10)
-    p1, p2, p3 = generate_q2funcs(a2_6_10)
-    q1s = f1(T_SERIES)
-    dq1s = f2(T_SERIES)
-    ddq1s = f3(T_SERIES)
-    q2s = p1(T_SERIES)
-    dq2s = p2(T_SERIES)
-    ddq2s = p3(T_SERIES)
+    q1func, dq1func, ddq1func = generate_q1funcs(a1_6_10)
+    q2func, dq2func, ddq2func = generate_q2funcs(a1_6_10)
+    q1s = q1func(T_SERIES)
+    dq1s = dq1func(T_SERIES)
+    ddq1s = ddq1func(T_SERIES)
+    q2s = q2func(T_SERIES)
+    dq2s = dq2func(T_SERIES)
+    ddq2s = ddq2func(T_SERIES)
     tau1 = m11(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m12(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h1(q1s, q2s, dq1s, dq2s, 0) + g1(q1s, q2s, dq1s, dq2s, 0)
     tau2 = m21(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m22(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h2(q1s, q2s, dq1s, dq2s, 0) + g2(q1s, q2s, dq1s, dq2s, 0)
     return tau1, tau2
