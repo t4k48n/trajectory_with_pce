@@ -89,6 +89,7 @@ T_INIT = 0.0
 T_FINAL = 3.0
 T_STEP_N = 3001 # 時系列[T_INIT, ..., T_FINAL]の長さ。
                 # 始点、終点を含むことに注意
+DELTA_T = (T_FINAL - T_INIT) / (T_STEP_N - 1)
 T_SERIES = numpy.linspace(T_INIT, T_FINAL, T_STEP_N)
 
 # 初期姿勢、終端姿勢
@@ -135,6 +136,31 @@ def calculate_taus(a1_6_10, a2_6_10):
     tau1 = m11(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m12(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h1(q1s, q2s, dq1s, dq2s, 0) + g1(q1s, q2s, dq1s, dq2s, 0)
     tau2 = m21(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m22(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h2(q1s, q2s, dq1s, dq2s, 0) + g2(q1s, q2s, dq1s, dq2s, 0)
     return tau1, tau2
+
+def simulate_without_grasping_object(tau1_series, tau2_series):
+    tau_series = numpy.vstack((tau1_series, tau2_series)).T
+    q1_series = numpy.zeros(T_STEP_N)
+    q2_series = numpy.zeros(T_STEP_N)
+    dq1_series = numpy.zeros(T_STEP_N)
+    dq2_series = numpy.zeros(T_STEP_N)
+    q1_series[0] = Q1_INIT
+    q2_series[0] = Q2_INIT
+    for i in range(T_STEP_N - 1):
+        M = numpy.array([[m11(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0), m12(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)],
+                         [m21(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0), m22(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)]])
+        H = numpy.array([h1(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0),
+                         h2(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)])
+        G = numpy.array([g1(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0),
+                         g2(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)])
+        T = tau_series[i]
+        dq1 = dq1_series[i]
+        dq2 = dq2_series[i]
+        ddq1, ddq2 = numpy.linalg.solve(M, T - H - G)
+        q1_series[i + 1] += q1_series[i] + DELTA_T * dq1
+        q2_series[i + 1] += q2_series[i] + DELTA_T * dq2
+        dq1_series[i + 1] += dq1_series[i] + DELTA_T * ddq1
+        dq2_series[i + 1] += dq2_series[i] + DELTA_T * ddq2
+    return q1_series, q2_series, dq1_series, dq2_series
 
 if __name__ == "__main__":
     a1_6_10 = numpy.array([1.0, 0.0, 0.0, 0.0, 0.0])
