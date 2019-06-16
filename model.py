@@ -3,6 +3,7 @@ import numpy.random
 import numpy.linalg
 
 import scipy.special
+import scipy.optimize
 
 import matplotlib
 matplotlib.use("Qt5Agg")
@@ -204,17 +205,8 @@ def evaluate_final_state(a1_6_10_and_a2_6_10):
     return numpy.sqrt(q1_var + q2_var)
 
 if __name__ == "__main__":
-    a1_6_10 = numpy.zeros(5, dtype=numpy.float64)
-    a2_6_10 = numpy.zeros(5, dtype=numpy.float64)
-    q1_ref =  generate_q1funcs(a1_6_10)[0](T_SERIES)
-    q2_ref =  generate_q2funcs(a2_6_10)[0](T_SERIES)
-    tau1_series, tau2_series = calculate_taus(a1_6_10, a2_6_10)
-    q1_pc, q2_pc, dq1_pc, dq2_pc = calculate_pc(tau1_series, tau2_series)
-    _, a = matplotlib.pyplot.subplots()
-    MC_N = 1000
-    mc_sample = numpy.array([simulate(tau1_series, tau2_series, z)[0]
-                             for z in numpy.random.normal(0, 1, MC_N)])
-    a.plot(q1_pc[0], label="pc 0")
-    a.plot(mc_sample.mean(axis=0), label="mean")
-    a.legend()
-    matplotlib.pyplot.show()
+    a1_6_10_init = numpy.zeros(5, dtype=numpy.float64)
+    a2_6_10_init = numpy.zeros(5, dtype=numpy.float64)
+    as_6_10_init = numpy.hstack((a1_6_10_init, a2_6_10_init))
+    as_6_10_opt = scipy.optimize.fmin(evaluate_final_state, as_6_10_init)
+    a1_6_10_opt, a2_6_10_opt = as_6_10_opt[:5], as_6_10_opt[5:]
