@@ -164,6 +164,7 @@ def simulate(tau1_series, tau2_series, z):
 PCE_TERM_NUM = 9 # PCE_TERM_NUM = 9にしておけばほぼずれはなくなる
 POLYNOMIALS = lambda z: numpy.array([scipy.special.eval_hermitenorm(i, z)
                                      for i in range(PCE_TERM_NUM)])
+INNER_PRODUCTS = numpy.sqrt(2.0 * numpy.pi) * numpy.array([numpy.math.factorial(i) for i in range(PCE_TERM_NUM)])
 COLLOCATIONS = numpy.asarray(sorted(scipy.special.roots_hermitenorm(PCE_TERM_NUM)[0],
                                     key=lambda c: numpy.abs(c)))
 PCE_MATRIX = POLYNOMIALS(COLLOCATIONS).T
@@ -189,11 +190,18 @@ def calculate_pc(tau1, tau2):
     dq2_pc = numpy.linalg.solve(PCE_MATRIX, dq2_mat)
     return q1_pc, q2_pc, dq1_pc, dq2_pc
 
+def calculate_pc_var(coef):
+    return (coef[1:] ** 2.0) @ INNER_PRODUCTS[1:]
+
 def evaluate_final_state(a1_6_10_and_a2_6_10):
+    a1_6_10_and_a2_6_10 = numpy.asarray(a1_6_10_and_a2_6_10)
     a1_6_10 = a1_6_10_and_a2_6_10[:5]
     a2_6_10 = a1_6_10_and_a2_6_10[5:]
-    tau1, tau2 =  calculate_taus(a1_6_10, a2_6_10)
-    return tau1, tau2
+    tau1_series, tau2_series =  calculate_taus(a1_6_10, a2_6_10)
+    q1_pc, q2_pc, dq1_pc, dq2_pc = calculate_pc(tau1_series, tau2_series)
+    q1_var = calculate_pc_var(q1_pc[:, -1])
+    q2_var = calculate_pc_var(q2_pc[:, -1])
+    return numpy.sqrt(q1_var + q2_var)
 
 if __name__ == "__main__":
     a1_6_10 = numpy.zeros(5, dtype=numpy.float64)
