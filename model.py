@@ -1,5 +1,8 @@
 import numpy
+import numpy.random
 import numpy.linalg
+
+import scipy.special
 
 import matplotlib
 matplotlib.use("Qt5Agg")
@@ -7,8 +10,14 @@ import matplotlib.pyplot
 
 g = 9.80665
 
+# リンク質量
 m1 = 1.0
 m2 = 1.0
+
+# 把持物質量（期待値と不確かさの大きさ）
+mm = 1.0
+dm = 0.2
+m = lambda z: mm + dm * z
 
 l1 = 1.0
 l2 = 1.0
@@ -86,8 +95,8 @@ def ddt_seq(t):
 
 # 時刻
 T_INIT = 0.0
-T_FINAL = 3.0
-T_STEP_N = 3001 # 時系列[T_INIT, ..., T_FINAL]の長さ。
+T_FINAL = 1.0
+T_STEP_N = 1001 # 時系列[T_INIT, ..., T_FINAL]の長さ。
                 # 始点、終点を含むことに注意
 DELTA_T = (T_FINAL - T_INIT) / (T_STEP_N - 1)
 T_SERIES = numpy.linspace(T_INIT, T_FINAL, T_STEP_N)
@@ -133,12 +142,23 @@ def calculate_taus(a1_6_10, a2_6_10):
     q2s = q2func(T_SERIES)
     dq2s = dq2func(T_SERIES)
     ddq2s = ddq2func(T_SERIES)
-    tau1 = m11(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m12(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h1(q1s, q2s, dq1s, dq2s, 0) + g1(q1s, q2s, dq1s, dq2s, 0)
-    tau2 = m21(q1s, q2s, dq1s, dq2s, 0) * ddq1s + m22(q1s, q2s, dq1s, dq2s, 0) * ddq2s + h2(q1s, q2s, dq1s, dq2s, 0) + g2(q1s, q2s, dq1s, dq2s, 0)
+    tau1 = m11(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s + m12(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s + h1(q1s, q2s, dq1s, dq2s, m(0)) + g1(q1s, q2s, dq1s, dq2s, m(0))
+    tau2 = m21(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s + m22(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s + h2(q1s, q2s, dq1s, dq2s, m(0)) + g2(q1s, q2s, dq1s, dq2s, m(0))
     return tau1, tau2
 
-def simulate_without_grasping_object(tau1_series, tau2_series):
-    tau_series = numpy.vstack((tau1_series, tau2_series)).T
+def calculate_ddqs(q1, q2, dq1, dq2, m, tau1, tau2):
+    M = numpy.array([[m11(q1, q2, dq1, dq2, m), m12(q1, q2, dq1, dq2, m)],
+                     [m21(q1, q2, dq1, dq2, m), m22(q1, q2, dq1, dq2, m)]])
+    H = numpy.array([h1(q1, q2, dq1, dq2, m),
+                     h2(q1, q2, dq1, dq2, m)])
+    G = numpy.array([g1(q1, q2, dq1, dq2, m),
+                     g2(q1, q2, dq1, dq2, m)])
+    T = numpy.array([tau1, tau2])
+    ddqs = numpy.linalg.solve(M, T - H - G)
+    return ddqs
+
+def simulate(tau1_series, tau2_series, z):
+    #tau_series = numpy.vstack((tau1_series, tau2_series)).T
     q1_series = numpy.zeros(T_STEP_N)
     q2_series = numpy.zeros(T_STEP_N)
     dq1_series = numpy.zeros(T_STEP_N)
@@ -146,41 +166,62 @@ def simulate_without_grasping_object(tau1_series, tau2_series):
     q1_series[0] = Q1_INIT
     q2_series[0] = Q2_INIT
     for i in range(T_STEP_N - 1):
-        M = numpy.array([[m11(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0), m12(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)],
-                         [m21(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0), m22(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)]])
-        H = numpy.array([h1(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0),
-                         h2(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)])
-        G = numpy.array([g1(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0),
-                         g2(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], 0.0)])
-        T = tau_series[i]
         dq1 = dq1_series[i]
         dq2 = dq2_series[i]
-        ddq1, ddq2 = numpy.linalg.solve(M, T - H - G)
+        ddq1, ddq2 = calculate_ddqs(q1_series[i], q2_series[i], dq1_series[i], dq2_series[i], m(z), tau1_series[i], tau2_series[i])
         q1_series[i + 1] += q1_series[i] + DELTA_T * dq1
         q2_series[i + 1] += q2_series[i] + DELTA_T * dq2
         dq1_series[i + 1] += dq1_series[i] + DELTA_T * ddq1
         dq2_series[i + 1] += dq2_series[i] + DELTA_T * ddq2
     return q1_series, q2_series, dq1_series, dq2_series
 
+# PCE uses polynomials `${\phi_0, \phi_1, \ldots, \phi_{PCE_TERM_NUM - 1}}$`.
+PCE_TERM_NUM = 3
+POLYNOMIALS = lambda z: numpy.array([scipy.special.eval_hermitenorm(i, z)
+                                     for i in range(PCE_TERM_NUM)])
+COLLOCATIONS = numpy.asarray(sorted(scipy.special.roots_hermitenorm(PCE_TERM_NUM)[0],
+                                    key=lambda c: numpy.abs(c)))
+PCE_MATRIX = POLYNOMIALS(COLLOCATIONS).T
+
+def call_pce_function(coef, z):
+    coef = numpy.asarray(coef)
+    z = numpy.asarray(z)
+    if z.ndim == 0:
+        return coef @ POLYNOMIALS(z)
+    elif z.ndim == 1:
+        return coef @ POLYNOMIALS(z).T
+    raise ValueError("pce_function: dimention of z must be 0 or one")
+
+def calculate_pc(tau1, tau2):
+    simulate_results = [simulate(tau1, tau2, z) for z in COLLOCATIONS]
+    q1_mat = numpy.array([r[0] for r in simulate_results])
+    q2_mat = numpy.array([r[1] for r in simulate_results])
+    dq1_mat = numpy.array([r[2] for r in simulate_results])
+    dq2_mat = numpy.array([r[3] for r in simulate_results])
+    q1_pc = numpy.linalg.solve(PCE_MATRIX, q1_mat)
+    q2_pc = numpy.linalg.solve(PCE_MATRIX, q2_mat)
+    dq1_pc = numpy.linalg.solve(PCE_MATRIX, dq1_mat)
+    dq2_pc = numpy.linalg.solve(PCE_MATRIX, dq2_mat)
+    return q1_pc, q2_pc, dq1_pc, dq2_pc
+
+def evaluate_final_state(a1_6_10_and_a2_6_10):
+    a1_6_10 = a1_6_10_and_a2_6_10[:5]
+    a2_6_10 = a1_6_10_and_a2_6_10[5:]
+    tau1, tau2 =  calculate_taus(a1_6_10, a2_6_10)
+    return tau1, tau2
+
 if __name__ == "__main__":
-    a1_6_10 = numpy.array([1.0, 0.0, 0.0, 0.0, 0.0])
-    a2_6_10 = numpy.array([-1.0, 0.0, 0.0, 0.0, 0.0])
-    f1, f2, f3 = generate_q1funcs(a1_6_10)
-    p1, p2, p3 = generate_q2funcs(a2_6_10)
-
-    q1 = f1(T_SERIES)
-    q2 = p1(T_SERIES)
-
-    fig = matplotlib.pyplot.figure(figsize=(10.0, 8.0))
-    ax1 = fig.add_subplot(211)
-    ax1.plot(q1, label="q1")
-    ax1.plot(q2, label="q2")
-    ax1.legend()
-
-    tau1, tau2 = calculate_taus(a1_6_10, a2_6_10)
-
-    ax2 = fig.add_subplot(212)
-    ax2.plot(tau1, label="tau1")
-    ax2.plot(tau2, label="tau2")
-    ax2.legend()
+    a1_6_10 = numpy.zeros(5, dtype=numpy.float64)
+    a2_6_10 = numpy.zeros(5, dtype=numpy.float64)
+    q1_ref =  generate_q1funcs(a1_6_10)[0](T_SERIES)
+    q2_ref =  generate_q2funcs(a2_6_10)[0](T_SERIES)
+    tau1_series, tau2_series = calculate_taus(a1_6_10, a2_6_10)
+    q1_pc, q2_pc, dq1_pc, dq2_pc = calculate_pc(tau1_series, tau2_series)
+    _, a = matplotlib.pyplot.subplots()
+    MC_N = 1000
+    mc_sample = numpy.array([simulate(tau1_series, tau2_series, z)[0]
+                             for z in numpy.random.normal(0, 1, MC_N)])
+    a.plot(q1_pc[0], label="pc 0")
+    a.plot(mc_sample.mean(axis=0), label="mean")
+    a.legend()
     matplotlib.pyplot.show()
