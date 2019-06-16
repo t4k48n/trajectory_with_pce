@@ -15,8 +15,8 @@ m1 = 1.0
 m2 = 1.0
 
 # 把持物質量（期待値と不確かさの大きさ）
-mm = 1.0
-dm = 0.2
+mm = 0.1
+dm = 0.001
 m = lambda z: mm + dm * z
 
 l1 = 1.0
@@ -176,7 +176,7 @@ def simulate(tau1_series, tau2_series, z):
     return q1_series, q2_series, dq1_series, dq2_series
 
 # PCE uses polynomials `${\phi_0, \phi_1, \ldots, \phi_{PCE_TERM_NUM - 1}}$`.
-PCE_TERM_NUM = 3
+PCE_TERM_NUM = 9 # PCE_TERM_NUM = 9にしておけばほぼずれはなくなる
 POLYNOMIALS = lambda z: numpy.array([scipy.special.eval_hermitenorm(i, z)
                                      for i in range(PCE_TERM_NUM)])
 COLLOCATIONS = numpy.asarray(sorted(scipy.special.roots_hermitenorm(PCE_TERM_NUM)[0],
