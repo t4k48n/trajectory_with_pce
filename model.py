@@ -49,11 +49,6 @@ def h1(q1, q2, dq1, dq2, m):
 def h2(q1, q2, dq1, dq2, m):
     return (l1*l2*m2*numpy.sin(q2)/2 + l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m - l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq1**2
 
-def _t_seq_slower(t):
-    t = numpy.asarray(t, dtype=numpy.float64)
-    return numpy.array([_t_seq_slower.tf(i, t) for i in range(11)], dtype=numpy.float64)
-_t_seq_slower.tf = numpy.vectorize(lambda i, t: t ** i)
-
 SEQ_INDEX = numpy.arange(11)
 
 def t_seq(t):
@@ -65,11 +60,6 @@ def t_seq(t):
     raise ValueError("dimention of t must be 0 or one")
 SEQ_INDEX = numpy.arange(11)
 
-def _dt_seq_slower(t):
-    t = numpy.asarray(t, dtype=numpy.float64)
-    return numpy.array([_dt_seq_slower.dtf(i, t) for i in range(11)], dtype=numpy.float64)
-_dt_seq_slower.dtf = numpy.vectorize(lambda i, t: i * t ** (i - 1.0) if i - 1 >= 0 else 0.0)
-
 def dt_seq(t):
     t = numpy.asarray(t, dtype=numpy.float64)
     if t.ndim == 0:
@@ -78,11 +68,6 @@ def dt_seq(t):
         seq_index = numpy.expand_dims(SEQ_INDEX, 1)
         return seq_index * numpy.nan_to_num(t ** (seq_index - 1.0))
     raise ValueError("dimention of t must be 0 or one")
-
-def _ddt_seq_slower(t):
-    t = numpy.asarray(t, dtype=numpy.float64)
-    return numpy.array([_ddt_seq_slower.ddtf(i, t) for i in range(11)], dtype=numpy.float64)
-_ddt_seq_slower.ddtf = numpy.vectorize(lambda i, t: i*(i-1.0)*t**(i-2.0) if i - 2 >= 0 else 0.0)
 
 def ddt_seq(t):
     t = numpy.asarray(t, dtype=numpy.float64)
