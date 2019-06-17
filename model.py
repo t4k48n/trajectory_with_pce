@@ -58,7 +58,7 @@ def t_seq(t):
         return t ** SEQ_INDEX
     elif t.ndim == 1:
         return t ** numpy.expand_dims(SEQ_INDEX, 1)
-    raise ValueError("dimention of t must be 0 or one")
+    raise ValueError("dimention of t must be 0 or 1")
 SEQ_INDEX = numpy.arange(11)
 
 def dt_seq(t):
@@ -68,7 +68,7 @@ def dt_seq(t):
     elif t.ndim == 1:
         seq_index = numpy.expand_dims(SEQ_INDEX, 1)
         return seq_index * numpy.nan_to_num(t ** (seq_index - 1.0))
-    raise ValueError("dimention of t must be 0 or one")
+    raise ValueError("dimention of t must be 0 or 1")
 
 def ddt_seq(t):
     t = numpy.asarray(t, dtype=numpy.float64)
@@ -77,7 +77,7 @@ def ddt_seq(t):
     elif t.ndim == 1:
         seq_index = numpy.expand_dims(SEQ_INDEX, 1)
         return seq_index * (seq_index - 1.0) * numpy.nan_to_num(t ** (seq_index - 2.0))
-    raise ValueError("dimention of t must be 0 or one")
+    raise ValueError("dimention of t must be 0 or 1")
 
 # 時刻
 T_INIT = 0.0
@@ -177,7 +177,7 @@ def call_pce_function(coef, z):
         return coef @ POLYNOMIALS(z)
     elif z.ndim == 1:
         return coef @ POLYNOMIALS(z).T
-    raise ValueError("pce_function: dimention of z must be 0 or one")
+    raise ValueError("pce_function: dimention of z must be 0 or 1")
 
 def calculate_pc(tau1, tau2):
     simulate_results = [simulate(tau1, tau2, z) for z in COLLOCATIONS]
