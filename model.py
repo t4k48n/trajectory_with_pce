@@ -210,3 +210,7 @@ if __name__ == "__main__":
     as_6_10_init = numpy.hstack((a1_6_10_init, a2_6_10_init))
     as_6_10_opt = scipy.optimize.fmin(evaluate_final_state, as_6_10_init)
     a1_6_10_opt, a2_6_10_opt = as_6_10_opt[:5], as_6_10_opt[5:]
+    numpy.save("a1_6_10_init.npy", a1_6_10_init)
+    numpy.save("a2_6_10_init.npy", a2_6_10_init)
+    numpy.save("a1_6_10_opt.npy", a1_6_10_opt)
+    numpy.save("a2_6_10_opt.npy", a2_6_10_opt)
