@@ -192,7 +192,12 @@ def calculate_pc(tau1, tau2):
     return q1_pc, q2_pc, dq1_pc, dq2_pc
 
 def calculate_pc_var(coef):
-    return (coef[1:] ** 2.0) @ INNER_PRODUCTS[1:]
+    coef = numpy.asarray(coef)
+    if coef.ndim == 1:
+        return (coef[1:] ** 2.0) @ INNER_PRODUCTS[1:]
+    elif coef.ndim == 2:
+        return (coef.T[:, 1:] ** 2.0) @ INNER_PRODUCTS[1:]
+    raise ValueError("pce_function: dimention of coef must be 0 or 1")
 
 def evaluate_final_state(a1_6_10_and_a2_6_10):
     a1_6_10_and_a2_6_10 = numpy.asarray(a1_6_10_and_a2_6_10)
