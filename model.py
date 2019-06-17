@@ -199,7 +199,7 @@ def calculate_pc_var(coef):
         return (coef.T[:, 1:] ** 2.0) @ INNER_PRODUCTS[1:]
     raise ValueError("pce_function: dimention of coef must be 0 or 1")
 
-def evaluate_final_state(a1_6_10_and_a2_6_10):
+def evaluate_final_state_with_input_constraints(a1_6_10_and_a2_6_10, w_var, w_input):
     a1_6_10_and_a2_6_10 = numpy.asarray(a1_6_10_and_a2_6_10)
     a1_6_10 = a1_6_10_and_a2_6_10[:5]
     a2_6_10 = a1_6_10_and_a2_6_10[5:]
@@ -207,7 +207,10 @@ def evaluate_final_state(a1_6_10_and_a2_6_10):
     q1_pc, q2_pc, dq1_pc, dq2_pc = calculate_pc(tau1_series, tau2_series)
     q1_var = calculate_pc_var(q1_pc[:, -1])
     q2_var = calculate_pc_var(q2_pc[:, -1])
-    return numpy.sqrt(q1_var + q2_var)
+    return w_var * numpy.sqrt(q1_var + q2_var) + w_input * (tau1_series ** 2.0 + tau2_series ** 2.0).mean()
+
+def evaluate_final_state(a1_6_10_and_a2_6_10):
+    return evaluate_final_state_with_input_constraints(a1_6_10_and_a2_6_10, 1.0, 0.0)
 
 if __name__ == "__main__":
     a1_6_10_init = numpy.zeros(5, dtype=numpy.float64)
