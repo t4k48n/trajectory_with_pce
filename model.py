@@ -103,8 +103,16 @@ BOUND_COND_VEC = numpy.array([t_seq(T_INIT),
 Q1_BOUND_COND = numpy.array([Q1_INIT, 0.0, 0.0, Q1_FINAL, 0.0, 0.0])
 Q2_BOUND_COND = numpy.array([Q2_INIT, 0.0, 0.0, Q2_FINAL, 0.0, 0.0])
 
-def generate_q1funcs(a_6_10):
+def calculate_q1_complement_parameters(a_6_10):
     a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6], Q1_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
+    return a_0_5
+
+def calculate_q2_complement_parameters(a_6_10):
+    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6], Q2_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
+    return a_0_5
+
+def generate_q1funcs(a_6_10):
+    a_0_5 = calculate_q1_complement_parameters(a_6_10)
     a_0_10 = numpy.hstack((a_0_5, a_6_10))
     q1func = lambda t: a_0_10 @ t_seq(t)
     dq1func = lambda t: a_0_10 @ dt_seq(t)
@@ -112,7 +120,7 @@ def generate_q1funcs(a_6_10):
     return q1func, dq1func, ddq1func
 
 def generate_q2funcs(a_6_10):
-    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6], Q2_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
+    a_0_5 = calculate_q2_complement_parameters(a_6_10)
     a_0_10 = numpy.hstack((a_0_5, a_6_10))
     q2func = lambda t: a_0_10 @ t_seq(t)
     dq2func = lambda t: a_0_10 @ dt_seq(t)
