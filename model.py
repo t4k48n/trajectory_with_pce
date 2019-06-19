@@ -221,12 +221,50 @@ def evaluate_final_state(a1_6_10_and_a2_6_10):
     return evaluate_final_state_with_input_constraints(a1_6_10_and_a2_6_10, 1.0, 0.0)
 
 if __name__ == "__main__":
-    a1_6_10_init = numpy.zeros(5, dtype=numpy.float64)
-    a2_6_10_init = numpy.zeros(5, dtype=numpy.float64)
-    as_6_10_init = numpy.hstack((a1_6_10_init, a2_6_10_init))
-    as_6_10_opt = scipy.optimize.fmin(evaluate_final_state, as_6_10_init)
-    a1_6_10_opt, a2_6_10_opt = as_6_10_opt[:5], as_6_10_opt[5:]
-    numpy.save("a1_6_10_init.npy", a1_6_10_init)
-    numpy.save("a2_6_10_init.npy", a2_6_10_init)
-    numpy.save("a1_6_10_opt.npy", a1_6_10_opt)
-    numpy.save("a2_6_10_opt.npy", a2_6_10_opt)
+    param_q1_6_10_init = numpy.zeros(5, dtype=numpy.float64)
+    param_q2_6_10_init = numpy.zeros(5, dtype=numpy.float64)
+    param_q1_init = numpy.hstack((calculate_q1_complement_parameters(param_q1_6_10_init),
+                                  param_q1_6_10_init))
+    param_q2_init = numpy.hstack((calculate_q2_complement_parameters(param_q2_6_10_init),
+                                  param_q2_6_10_init))
+    numpy.save("param_q1_init.npy",
+               param_q1_init)
+    numpy.save("param_q2_init.npy",
+               param_q2_init)
+
+    torque_weights_float_string = [(0, "0"),
+                                   (1E-8, "1E-8"),
+                                   (5E-8, "5E-8"),
+                                   (1E-7, "1E-7"),
+                                   (5E-7, "5E-7"),
+                                   (1E-6, "1E-6"),
+                                   (5E-6, "5E-6"),
+                                   (1E-5, "1E-5"),
+                                   (5E-5, "5E-5"),
+                                   (1E-4, "1E-4"),
+                                   (5E-4, "5E-4"),
+                                   (1E-3, "1E-3"),
+                                   (5E-3, "5E-3"),
+                                   (1E-2, "1E-2"),
+                                   (5E-2, "5E-2"),
+                                   (1E-1, "1E-1"),
+                                   (5E-1, "5E-1"),
+                                   (1, "1")]
+    for f, s in torque_weights_float_string:
+        evf = lambda p: evaluate_final_state_with_input_constraints(p,
+                                                                    1.0,
+                                                                    f)
+        param_q1_6_10_and_q2_6_10_init = numpy.hstack((param_q1_6_10_init,
+                                                       param_q2_6_10_init))
+        param_q1_6_10_and_q2_6_10_opt = scipy.optimize.fmin(evf,
+                                                            param_q1_6_10_and_q2_6_10_init)
+        param_q1_6_10_opt = param_q1_6_10_and_q2_6_10_opt[:5]
+        param_q2_6_10_opt = param_q1_6_10_and_q2_6_10_opt[5:]
+        param_q1_opt = numpy.hstack((calculate_q1_complement_parameters(param_q1_6_10_opt),
+                                      param_q1_6_10_opt))
+        param_q2_opt = numpy.hstack((calculate_q2_complement_parameters(param_q2_6_10_opt),
+                                      param_q2_6_10_opt))
+        numpy.save("param_q1_opt_{}.npy".format(s),
+                   param_q1_opt)
+        numpy.save("param_q2_opt_{}.npy".format(s),
+                   param_q2_opt)
