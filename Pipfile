@@ -13,6 +13,7 @@ ipython = "*"
 matplotlib = "*"
 pyqt5 = "*"
 pexpect = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.7"
