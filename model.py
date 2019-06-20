@@ -136,7 +136,7 @@ def calculate_q2_complement_parameters(a_6_10):
     return a_0_5
 
 def calculate_q2_parameters(a_6_10):
-    a_0_5 = calculate_q1_complement_parameters(a_6_10)
+    a_0_5 = calculate_q2_complement_parameters(a_6_10)
     return numpy.hstack((a_0_5, a_6_10))
 
 def generate_q1funcs(a_6_10):
