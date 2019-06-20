@@ -23,28 +23,48 @@ I1 = m1 ** l1 / 12.0
 I2 = m2 ** l2 / 12.0
 
 def m11(q1, q2, dq1, dq2, m):
-    return I1 + l1**2*m1/4 + l1**2*m2 + l1**2*numpy.sin(q1)**2*m + l1**2*numpy.cos(q1)**2*m + l1*l2*m2*numpy.cos(q2) + 2*l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m + 2*l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
+    return I1 + l1**2*m1/4 + l1**2*m2 + l1**2*numpy.sin(q1)**2*m \
+           + l1**2*numpy.cos(q1)**2*m + l1*l2*m2*numpy.cos(q2) \
+           + 2*l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m \
+           + 2*l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 \
+           + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
 
 def m12(q1, q2, dq1, dq2, m):
-    return l1*l2*m2*numpy.cos(q2)/2 + l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m + l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
+    return l1*l2*m2*numpy.cos(q2)/2 \
+           + l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m \
+           + l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 \
+           + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
 
 def m21(q1, q2, dq1, dq2, m):
-    return l1*l2*m2*numpy.cos(q2)/2 + l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m + l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
+    return l1*l2*m2*numpy.cos(q2)/2 \
+           + l1*l2*numpy.sin(q1 + q2)*numpy.sin(q1)*m \
+           + l1*l2*numpy.cos(q1 + q2)*numpy.cos(q1)*m + l2**2*m2/4 \
+           + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
 
 def m22(q1, q2, dq1, dq2, m):
-    return I2 + l2**2*m2/4 + l2**2*numpy.sin(q1 + q2)**2*m + l2**2*numpy.cos(q1 + q2)**2*m
+    return I2 + l2**2*m2/4 + l2**2*numpy.sin(q1 + q2)**2*m \
+           + l2**2*numpy.cos(q1 + q2)**2*m
 
 def g1(q1, q2, dq1, dq2, m):
-    return g*(l1*m1*numpy.cos(q1)/2 + l1*m2*numpy.cos(q1) + l1*numpy.cos(q1)*m + l2*m2*numpy.cos(q1 + q2)/2 + l2*numpy.cos(q1 + q2)*m)
+    return g*(l1*m1*numpy.cos(q1)/2 + l1*m2*numpy.cos(q1) \
+              + l1*numpy.cos(q1)*m + l2*m2*numpy.cos(q1 + q2)/2 \
+              + l2*numpy.cos(q1 + q2)*m)
 
 def g2(q1, q2, dq1, dq2, m):
     return g*(l2*m2*numpy.cos(q1 + q2)/2 + l2*numpy.cos(q1 + q2)*m)
 
 def h1(q1, q2, dq1, dq2, m):
-    return (-l1*l2*m2*numpy.sin(q2) - 2*l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m + 2*l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq1*dq2 + (-l1*l2*m2*numpy.sin(q2)/2 - l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m + l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq2**2
+    return (-l1*l2*m2*numpy.sin(q2) \
+            - 2*l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m \
+            + 2*l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq1*dq2 \
+           + (-l1*l2*m2*numpy.sin(q2)/2 \
+              - l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m \
+              + l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq2**2
 
 def h2(q1, q2, dq1, dq2, m):
-    return (l1*l2*m2*numpy.sin(q2)/2 + l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m - l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq1**2
+    return (l1*l2*m2*numpy.sin(q2)/2 \
+            + l1*l2*numpy.sin(q1 + q2)*numpy.cos(q1)*m \
+            - l1*l2*numpy.sin(q1)*numpy.cos(q1 + q2)*m)*dq1**2
 
 SEQ_INDEX = numpy.arange(11)
 
@@ -69,10 +89,12 @@ def dt_seq(t):
 def ddt_seq(t):
     t = numpy.asarray(t, dtype=numpy.float64)
     if t.ndim == 0:
-        return SEQ_INDEX * (SEQ_INDEX - 1.0) * numpy.nan_to_num(t ** (SEQ_INDEX - 2.0))
+        return SEQ_INDEX * (SEQ_INDEX - 1.0) \
+               * numpy.nan_to_num(t ** (SEQ_INDEX - 2.0))
     elif t.ndim == 1:
         seq_index = numpy.expand_dims(SEQ_INDEX, 1)
-        return seq_index * (seq_index - 1.0) * numpy.nan_to_num(t ** (seq_index - 2.0))
+        return seq_index * (seq_index - 1.0) \
+               * numpy.nan_to_num(t ** (seq_index - 2.0))
     raise ValueError("dimention of t must be 0 or 1")
 
 # 時刻
@@ -100,12 +122,22 @@ Q1_BOUND_COND = numpy.array([Q1_INIT, 0.0, 0.0, Q1_FINAL, 0.0, 0.0])
 Q2_BOUND_COND = numpy.array([Q2_INIT, 0.0, 0.0, Q2_FINAL, 0.0, 0.0])
 
 def calculate_q1_complement_parameters(a_6_10):
-    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6], Q1_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
+    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6],
+                               Q1_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
     return a_0_5
 
+def calculate_q1_parameters(a_6_10):
+    a_0_5 = calculate_q1_complement_parameters(a_6_10)
+    return numpy.hstack((a_0_5, a_6_10))
+
 def calculate_q2_complement_parameters(a_6_10):
-    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6], Q2_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
+    a_0_5 = numpy.linalg.solve(BOUND_COND_VEC[:, :6],
+                               Q2_BOUND_COND - BOUND_COND_VEC[:, 6:] @ a_6_10)
     return a_0_5
+
+def calculate_q2_parameters(a_6_10):
+    a_0_5 = calculate_q1_complement_parameters(a_6_10)
+    return numpy.hstack((a_0_5, a_6_10))
 
 def generate_q1funcs(a_6_10):
     a_0_5 = calculate_q1_complement_parameters(a_6_10)
@@ -132,8 +164,12 @@ def calculate_taus(a1_6_10, a2_6_10):
     q2s = q2func(T_SERIES)
     dq2s = dq2func(T_SERIES)
     ddq2s = ddq2func(T_SERIES)
-    tau1 = m11(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s + m12(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s + h1(q1s, q2s, dq1s, dq2s, m(0)) + g1(q1s, q2s, dq1s, dq2s, m(0))
-    tau2 = m21(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s + m22(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s + h2(q1s, q2s, dq1s, dq2s, m(0)) + g2(q1s, q2s, dq1s, dq2s, m(0))
+    tau1 = m11(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s \
+           + m12(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s \
+           + h1(q1s, q2s, dq1s, dq2s, m(0)) + g1(q1s, q2s, dq1s, dq2s, m(0))
+    tau2 = m21(q1s, q2s, dq1s, dq2s, m(0)) * ddq1s \
+           + m22(q1s, q2s, dq1s, dq2s, m(0)) * ddq2s \
+           + h2(q1s, q2s, dq1s, dq2s, m(0)) + g2(q1s, q2s, dq1s, dq2s, m(0))
     return tau1, tau2
 
 def calculate_ddqs(q1, q2, dq1, dq2, m, tau1, tau2):
@@ -148,7 +184,6 @@ def calculate_ddqs(q1, q2, dq1, dq2, m, tau1, tau2):
     return ddqs
 
 def simulate(tau1_series, tau2_series, z):
-    #tau_series = numpy.vstack((tau1_series, tau2_series)).T
     q1_series = numpy.zeros(T_STEP_N)
     q2_series = numpy.zeros(T_STEP_N)
     dq1_series = numpy.zeros(T_STEP_N)
@@ -247,20 +282,15 @@ if __name__ == "__main__":
                                    (5E-1, "5E-1"),
                                    (1, "1")]
     for f, s in torque_weights_float_string:
-        evf = lambda p: evaluate_final_state_with_input_constraints(p,
-                                                                    1.0,
-                                                                    f)
+        evf = lambda p: \
+                evaluate_final_state_with_input_constraints(p, 1.0, f)
         param_q1_6_10_and_q2_6_10_init = numpy.hstack((param_q1_6_10_init,
                                                        param_q2_6_10_init))
-        param_q1_6_10_and_q2_6_10_opt = scipy.optimize.fmin(evf,
-                                                            param_q1_6_10_and_q2_6_10_init)
+        param_q1_6_10_and_q2_6_10_opt = \
+                scipy.optimize.fmin(evf, param_q1_6_10_and_q2_6_10_init)
         param_q1_6_10_opt = param_q1_6_10_and_q2_6_10_opt[:5]
         param_q2_6_10_opt = param_q1_6_10_and_q2_6_10_opt[5:]
-        param_q1_opt = numpy.hstack((calculate_q1_complement_parameters(param_q1_6_10_opt),
-                                      param_q1_6_10_opt))
-        param_q2_opt = numpy.hstack((calculate_q2_complement_parameters(param_q2_6_10_opt),
-                                      param_q2_6_10_opt))
-        numpy.save("param_q1_opt_{}.npy".format(s),
-                   param_q1_opt)
-        numpy.save("param_q2_opt_{}.npy".format(s),
-                   param_q2_opt)
+        param_q1_opt = calculate_q1_parameters(param_q1_6_10_opt)
+        param_q2_opt = calculate_q2_parameters(param_q2_6_10_opt)
+        numpy.save("param_q1_opt_{}.npy".format(s), param_q1_opt)
+        numpy.save("param_q2_opt_{}.npy".format(s), param_q2_opt)
