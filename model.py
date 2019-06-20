@@ -287,7 +287,7 @@ if __name__ == "__main__":
         param_q1_6_10_and_q2_6_10_init = numpy.hstack((param_q1_6_10_init,
                                                        param_q2_6_10_init))
         param_q1_6_10_and_q2_6_10_opt = \
-                scipy.optimize.fmin(evf, param_q1_6_10_and_q2_6_10_init)
+                scipy.optimize.fmin_bfgs(evf, param_q1_6_10_and_q2_6_10_init)
         param_q1_6_10_opt = param_q1_6_10_and_q2_6_10_opt[:5]
         param_q2_6_10_opt = param_q1_6_10_and_q2_6_10_opt[5:]
         param_q1_opt = calculate_q1_parameters(param_q1_6_10_opt)
