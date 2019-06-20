@@ -5,10 +5,6 @@ import numpy.linalg
 import scipy.special
 import scipy.optimize
 
-import matplotlib
-matplotlib.use("Qt5Agg")
-import matplotlib.pyplot
-
 g = 9.80665
 
 # リンク質量
