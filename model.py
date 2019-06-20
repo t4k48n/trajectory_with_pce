@@ -157,7 +157,7 @@ def generate_q2funcs(a_6_10):
 
 def calculate_taus(a1_6_10, a2_6_10):
     q1func, dq1func, ddq1func = generate_q1funcs(a1_6_10)
-    q2func, dq2func, ddq2func = generate_q2funcs(a1_6_10)
+    q2func, dq2func, ddq2func = generate_q2funcs(a2_6_10)
     q1s = q1func(T_SERIES)
     dq1s = dq1func(T_SERIES)
     ddq1s = ddq1func(T_SERIES)
