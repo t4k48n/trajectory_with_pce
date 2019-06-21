@@ -263,7 +263,7 @@ if __name__ == "__main__":
     numpy.save("param_q2_init.npy",
                param_q2_init)
 
-    torque_weights_float_string = [(0, "0"),
+    torque_weights_float_string = [(0E-0, "0E-0"),
                                    (1E-8, "1E-8"),
                                    (5E-8, "5E-8"),
                                    (1E-7, "1E-7"),
@@ -280,7 +280,7 @@ if __name__ == "__main__":
                                    (5E-2, "5E-2"),
                                    (1E-1, "1E-1"),
                                    (5E-1, "5E-1"),
-                                   (1, "1")]
+                                   (1E-0, "1E-0")]
     for f, s in torque_weights_float_string:
         evf = lambda p: \
                 evaluate_final_state_with_input_constraints(p, 1.0, f)
