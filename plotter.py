@@ -96,6 +96,9 @@ def plot_selected():
     pc_q1_std = numpy.sqrt(pc_vars[:, 0])
     pc_q2_std = numpy.sqrt(pc_vars[:, 1])
     tau_ises = numpy.array([get_tau_ises(*get_taus(p1, p2)) for p1, p2, _ in param_pair_weight_list])
+    tau_ises_npy_path = cd / "tau_ises.npy"
+    if not tau_ises_npy_path.exists():
+        numpy.save(tau_ises_npy_path, tau_ises)
     tau1_ises = tau_ises[:, 0]
     tau2_ises = tau_ises[:, 1]
 
@@ -154,5 +157,67 @@ def plot_selected():
 
     plt.show()
 
+def tau_scale_test():
+    #import model
+    cd = pathlib.Path(__file__).absolute().parent
+    path_weight_list = [(cd / "param_q1_opt_1E-6.npy", "1E-6"),
+                        (cd / "param_q2_opt_1E-6.npy", "1E-6"),
+                        (cd / "param_q1_opt_1E-5.npy", "1E-5"),
+                        (cd / "param_q2_opt_1E-5.npy", "1E-5"),
+                        (cd / "param_q1_opt_1E-4.npy", "1E-4"),
+                        (cd / "param_q2_opt_1E-4.npy", "1E-4"),
+                        (cd / "param_q1_opt_1E-3.npy", "1E-3"),
+                        (cd / "param_q2_opt_1E-3.npy", "1E-3")]
+    param_pair_weight_list = [(numpy.load(p1), numpy.load(p2), w)
+                              for (p1, w), (p2, _)
+                              in make_pair_list(path_weight_list)]
+    x_ticks = [w for _, _, w in param_pair_weight_list]
+    pc_vars = numpy.array([get_var(p1, p2) for p1, p2, _ in param_pair_weight_list])
+    pc_q1_std = numpy.sqrt(pc_vars[:, 0])
+    pc_q2_std = numpy.sqrt(pc_vars[:, 1])
+    tau_ises_npy_path = cd / "tau_ises.npy"
+    if not tau_ises_npy_path.exists():
+        tau_ises = numpy.array([get_tau_ises(*get_taus(p1, p2)) for p1, p2, _ in param_pair_weight_list])
+        numpy.save(tau_ises_npy_path, tau_ises)
+    tau_ises = numpy.load(tau_ises_npy_path)
+    tau1_ises = tau_ises[:, 0]
+    tau2_ises = tau_ises[:, 1]
+
+    height = 55 / 25.4
+    width = 84 / 25.4
+
+    f, a_theta = plt.subplots(1, 1, figsize=(width, height))
+    f.subplots_adjust(top=0.784, bottom=0.207, left=0.202, right=0.792, hspace=0.2, wspace=0.2)
+    a_theta.plot(x_ticks, pc_q2_std, linestyle="--", color="#000000ff", marker="o", markerfacecolor="#000000ff", markeredgecolor="#000000ff", label=r"$\theta_{2}$")
+    a_theta.set_xlabel(r"$w_{\tau}$")
+    #a_theta.set_ylabel(r"Standard deviation of $\theta_2$ [deg]")
+    #a_theta.set_ylabel(r"Std. dev. of $\theta_2$ [deg]")
+    a_theta.legend()
+
+    a_tau = a_theta.twinx()
+    a_tau.plot(x_ticks, tau2_ises, linestyle="--", color="#000000ff", marker="s", markerfacecolor="#000000ff", markeredgecolor="#000000ff", label=r"$\tau_{2}$")
+    a_tau.set_yticks([0.0, 200.0, 400.0])
+    #a_tau.set_ylabel(r"Integrated squared $\tau_{2}$ [N${}^2$m${}^2$s]")
+    #a_tau.set_ylabel(r"Int. sq. of $\tau_{2}$ [N${}^2$m${}^2$s]")
+    #a_tau.set_ylabel(r"Int. Sq. of $\tau_{2}$ [N${}^2$m${}^2$]")
+    a_tau.legend()
+
+    #f = plt.figure(figsize=(width, height))
+    #plt.subplots_adjust(top=0.784, bottom=0.207, left=0.202, right=0.792, hspace=0.2, wspace=0.2)
+    #plt.plot(x_ticks, pc_q1_std, linestyle="none", marker="o", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\theta_1$")
+    #plt.plot(x_ticks, pc_q2_std, linestyle="none", marker="x", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\theta_2$")
+    #plt.xlabel(r"$w_{\tau}$")
+    #plt.ylabel(r"Std. dev. of $\theta_1, \theta_2$ [deg]")
+    #plt.legend()
+    #plt.gca().twinx()
+    #plt.plot(x_ticks, tau1_ises, linestyle="none", marker="^", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\tau_1$")
+    #plt.plot(x_ticks, tau2_ises, linestyle="none", marker="^", markerfacecolor="#000000ff", markeredgecolor="#000000ff", label=r"$\tau_2$")
+    #plt.ylabel(r"Int. Sq. of torque [N${}^2$m${}^2$]")
+    #plt.legend()
+    #f.savefig("angle_and_torque.svg")
+
+
+    plt.show()
+
 if __name__ == '__main__':
-    plot_selected()
+    tau_scale_test()
