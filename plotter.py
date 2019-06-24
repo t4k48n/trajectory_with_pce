@@ -21,11 +21,17 @@ def get_weight_string(path):
     parts = stem.split('_')
     return parts[-1]
 
-def get_tau(param_q1, param_q2):
+def get_taus(param_q1, param_q2):
     import model
     a1_6_10, a2_6_10 = param_q1[6:], param_q2[6:]
     tau1, tau2 = model.calculate_taus(a1_6_10, a2_6_10)
     return tau1, tau2
+
+get_tau = get_taus
+
+def get_tau_ises(tau1, tau2):
+    dt = 1.0 / 1000.0
+    return numpy.sum(tau1 ** 2 * dt), numpy.sum(tau2 ** 2 * dt)
 
 def get_var(param_q1, param_q2):
     import model
@@ -40,7 +46,6 @@ def plot_all_weights_vars():
     cd = pathlib.Path(__file__).absolute().parent
     q1_npy_files = sorted(cd.glob('param_q1_*.npy'), key=sort_key_for_npy)
     q2_npy_files = sorted(cd.glob('param_q2_*.npy'), key=sort_key_for_npy)
-    #[print(npy) for npy in npy_files]
     q1_npy_data = [numpy.load(npy) for npy in q1_npy_files]
     q2_npy_data = [numpy.load(npy) for npy in q2_npy_files]
 
@@ -75,14 +80,14 @@ def make_pair_list(single_list):
 def plot_selected():
     import model
     cd = pathlib.Path(__file__).absolute().parent
-    path_weight_list = [(cd / "param_q1_opt_1E-3.npy", "1E-3"),
-                        (cd / "param_q2_opt_1E-3.npy", "1E-3"),
-                        (cd / "param_q1_opt_1E-4.npy", "1E-4"),
-                        (cd / "param_q2_opt_1E-4.npy", "1E-4"),
+    path_weight_list = [(cd / "param_q1_opt_1E-6.npy", "1E-6"),
+                        (cd / "param_q2_opt_1E-6.npy", "1E-6"),
                         (cd / "param_q1_opt_1E-5.npy", "1E-5"),
                         (cd / "param_q2_opt_1E-5.npy", "1E-5"),
-                        (cd / "param_q1_opt_1E-6.npy", "1E-6"),
-                        (cd / "param_q2_opt_1E-6.npy", "1E-6")]
+                        (cd / "param_q1_opt_1E-4.npy", "1E-4"),
+                        (cd / "param_q2_opt_1E-4.npy", "1E-4"),
+                        (cd / "param_q1_opt_1E-3.npy", "1E-3"),
+                        (cd / "param_q2_opt_1E-3.npy", "1E-3")]
     param_pair_weight_list = [(numpy.load(p1), numpy.load(p2), w)
                               for (p1, w), (p2, _)
                               in make_pair_list(path_weight_list)]
@@ -90,53 +95,62 @@ def plot_selected():
     pc_vars = numpy.array([get_var(p1, p2) for p1, p2, _ in param_pair_weight_list])
     pc_q1_std = numpy.sqrt(pc_vars[:, 0])
     pc_q2_std = numpy.sqrt(pc_vars[:, 1])
+    tau_ises = numpy.array([get_tau_ises(*get_taus(p1, p2)) for p1, p2, _ in param_pair_weight_list])
+    tau1_ises = tau_ises[:, 0]
+    tau2_ises = tau_ises[:, 1]
 
     height = 55 / 25.4
     width = 84 / 25.4
 
-    plt.figure(figsize=(width, height))
-    plt.subplots_adjust(top=0.939, bottom=0.207, left=0.202, right=0.982, hspace=0.2, wspace=0.2)
+    f = plt.figure(figsize=(width, height))
+    plt.subplots_adjust(top=0.784, bottom=0.207, left=0.202, right=0.792, hspace=0.2, wspace=0.2)
     plt.plot(x_ticks, pc_q1_std, linestyle="none", marker="o", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\theta_1$")
     plt.plot(x_ticks, pc_q2_std, linestyle="none", marker="x", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\theta_2$")
     plt.xlabel(r"$w_{\tau}$")
-    plt.ylabel(r"Standard deviation [deg]")
-    plt.grid()
+    plt.ylabel(r"Std. dev. of $\theta_1, \theta_2$ [deg]")
     plt.legend()
+    plt.gca().twinx()
+    plt.plot(x_ticks, tau1_ises, linestyle="none", marker="^", markerfacecolor="#00000000", markeredgecolor="#000000ff", label=r"$\tau_1$")
+    plt.plot(x_ticks, tau2_ises, linestyle="none", marker="^", markerfacecolor="#000000ff", markeredgecolor="#000000ff", label=r"$\tau_2$")
+    plt.ylabel(r"Int. Sq. of torque [N${}^2$m${}^2$]")
+    plt.legend()
+    f.savefig("angle_and_torque.svg")
 
-    plt.figure(figsize=(width, height))
-    plt.subplots_adjust(top=0.729, bottom=0.207, left=0.202, right=0.982, hspace=0.2, wspace=0.2)
-    tlist = numpy.linspace(0, 3, 1001)
-    p1, p2, w = param_pair_weight_list[0]
+    f = plt.figure(figsize=(width, height))
+    plt.subplots_adjust(top=0.975, bottom=0.21, left=0.185, right=0.975, hspace=0.2, wspace=0.2)
+    tlist = numpy.linspace(0, 1, 1001)
+    p1, p2, w = param_pair_weight_list[3]
     tau1, tau2 = get_tau(p1, p2)
     plt.plot(tlist, tau1, linestyle="-", color="black", label=r"$\tau_{{1}}$ ({})".format(w))
     plt.plot(tlist, tau2, linestyle="-.", color="black", label=r"$\tau_{{2}}$ ({})".format(w))
-    p1, p2, w = param_pair_weight_list[2]
+    p1, p2, w = param_pair_weight_list[1]
     tau1, tau2 = get_tau(p1, p2)
     plt.plot(tlist, tau1, linestyle="--", color="black", label=r"$\tau_{{1}}$ ({})".format(w))
     plt.plot(tlist, tau2, linestyle=":", color="black", label=r"$\tau_{{2}}$ ({})".format(w))
     plt.xlabel(r"Time [s]")
     plt.ylabel(r"Torque [Nm]")
+    plt.yticks([-25.0, 0.0, 25.0, 50.0])
     plt.grid()
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    f.savefig("torque_series.svg")
 
-    plt.figure(figsize=(width, height))
-    plt.subplots_adjust(top=0.729, bottom=0.207, left=0.202, right=0.982, hspace=0.2, wspace=0.2)
-    tlist = numpy.linspace(0, 3, 1001)
-    p1, p2, w = param_pair_weight_list[0]
+    f = plt.figure(figsize=(width, height))
+    plt.subplots_adjust(top=0.975, bottom=0.21, left=0.185, right=0.975, hspace=0.2, wspace=0.2)
+    tlist = numpy.linspace(0, 1, 1001)
+    p1, p2, w = param_pair_weight_list[3]
     tau1, tau2 = get_tau(p1, p2)
     q1, q2, _, _ = model.simulate(tau1, tau2, 0)
     plt.plot(tlist, q1 * 180 / numpy.pi, linestyle="-", color="black", label=r"$\theta_{{1}}$ ({})".format(w))
     plt.plot(tlist, q2 * 180 / numpy.pi, linestyle="-.", color="black", label=r"$\theta_{{2}}$ ({})".format(w))
-    p1, p2, w = param_pair_weight_list[2]
+    p1, p2, w = param_pair_weight_list[1]
     tau1, tau2 = get_tau(p1, p2)
     q1, q2, _, _ = model.simulate(tau1, tau2, 0)
     plt.plot(tlist, q1 * 180 / numpy.pi, linestyle="--", color="black", label=r"$\theta_{{1}}$ ({})".format(w))
     plt.plot(tlist, q2 * 180 / numpy.pi, linestyle=":", color="black", label=r"$\theta_{{2}}$ ({})".format(w))
     plt.xlabel(r"Time [s]")
     plt.ylabel(r"Posture angle [deg]")
-    plt.yticks([-60, -30, 0, 30, 60, 90, 120])
+    plt.yticks([-60.0, 0.0, 60.0, 120.0])
     plt.grid()
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    f.savefig("angle_series.svg")
 
     plt.show()
 
